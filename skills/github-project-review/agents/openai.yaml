@@ -1,7 +1,7 @@
 interface:
   display_name: "GitHub 项目审查"
   short_description: "审查 GitHub 项目的形态、平台兼容性、采用价值与静态风险"
-  default_prompt: "Use $github-project-review to tell me plainly what these GitHub projects are, which operating systems they support, what static safety risks they have, and whether they are worth adopting with Agent assistance."
+  default_prompt: "使用 $github-project-review，用简单易懂的话审查这些 GitHub 项目的功能兑现度、实际用途、采用价值和静态安全风险，并告诉我是否值得在 Agent 协助下采用。"
 
 policy:
   allow_implicit_invocation: true

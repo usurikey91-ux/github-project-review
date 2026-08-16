@@ -184,6 +184,16 @@ def safe_cache_name(owner: str, repo: str) -> str:
     return re.sub(r"[^a-zA-Z0-9_.-]+", "_", f"{owner}__{repo}")
 
 
+def default_cache_dir() -> Path:
+    if sys.platform == "win32":
+        base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Caches"
+    else:
+        base = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
+    return base / "github-project-review"
+
+
 def quick_cache_path(cache_dir: Path, owner: str, repo: str) -> Path:
     return cache_dir / f"{safe_cache_name(owner, repo)}.quick.json"
 
@@ -240,17 +250,21 @@ def read_cache(path: Path, mode: str, max_age_hours: int | None = None) -> dict 
         return None
 
 
-def write_cache(path: Path, report: dict, mode: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "schema_version": CACHE_SCHEMA_VERSION,
-        "cached_at_utc": utc_now().isoformat(),
-        "mode": mode,
-        "report": report,
-    }
-    temp = path.with_suffix(path.suffix + f".{threading.get_ident()}.tmp")
-    temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    temp.replace(path)
+def write_cache(path: Path, report: dict, mode: str) -> bool:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "schema_version": CACHE_SCHEMA_VERSION,
+            "cached_at_utc": utc_now().isoformat(),
+            "mode": mode,
+            "report": report,
+        }
+        temp = path.with_suffix(path.suffix + f".{threading.get_ident()}.tmp")
+        temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        temp.replace(path)
+        return True
+    except OSError:
+        return False
 
 
 def parse_repo_url(value: str) -> tuple[str, str]:
@@ -814,7 +828,12 @@ def main() -> int:
     parser.add_argument("--mode", choices=("quick", "deep"), default="quick")
     parser.add_argument("--max-workers", type=int, default=DEFAULT_MAX_WORKERS)
     parser.add_argument("--request-budget", type=int, default=DEFAULT_REQUEST_BUDGET)
-    parser.add_argument("--cache-dir", type=Path, default=None)
+    parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=default_cache_dir(),
+        help="Cache directory; defaults to the operating system's user cache directory",
+    )
     parser.add_argument("--cache-hours", type=int, default=DEFAULT_CACHE_HOURS)
     parser.add_argument("--force-refresh", action="store_true")
     parser.add_argument(
