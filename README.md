@@ -24,6 +24,17 @@
 
 将 [`skills/github-project-review`](skills/github-project-review) 目录添加到支持 Agent Skills 的 Agent 中，然后提供一个或多个公开 GitHub 链接，例如：
 
+不熟悉安装方法时，可以直接把下面这段话发给你的 Agent：
+
+```text
+请从这个 GitHub 仓库安装“GitHub 项目审查”Skill：
+https://github.com/usurikey91-ux/github-project-review/tree/main/skills/github-project-review
+
+安装完成后，请告诉我是否安装成功。不要安装或运行任何被审查的项目。
+```
+
+安装完成后，可以这样使用：
+
 ```text
 使用 GitHub 项目审查：
 https://github.com/owner/repository

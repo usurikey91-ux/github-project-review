@@ -46,6 +46,37 @@ def repository_payload() -> dict:
 
 
 class CollectorTests(unittest.TestCase):
+    def test_default_cache_dir_uses_platform_user_cache_location(self):
+        with (
+            mock.patch.object(MODULE.sys, "platform", "win32"),
+            mock.patch.dict(os.environ, {"LOCALAPPDATA": "C:/Users/example/AppData/Local"}),
+        ):
+            self.assertEqual(
+                MODULE.default_cache_dir(),
+                Path("C:/Users/example/AppData/Local/github-project-review"),
+            )
+
+        with mock.patch.object(MODULE.sys, "platform", "darwin"):
+            self.assertEqual(
+                MODULE.default_cache_dir(),
+                Path.home() / "Library" / "Caches" / "github-project-review",
+            )
+
+        with (
+            mock.patch.object(MODULE.sys, "platform", "linux"),
+            mock.patch.dict(os.environ, {"XDG_CACHE_HOME": "/tmp/example-cache"}),
+        ):
+            self.assertEqual(
+                MODULE.default_cache_dir(),
+                Path("/tmp/example-cache/github-project-review"),
+            )
+
+    def test_cache_write_failure_does_not_stop_collection(self):
+        with mock.patch.object(Path, "mkdir", side_effect=OSError("read only")):
+            self.assertFalse(
+                MODULE.write_cache(Path("unwritable/cache.json"), {"status": "ok"}, "quick")
+            )
+
     def test_environment_token_is_ignored_without_explicit_parameter(self):
         class FakeResponse:
             def __enter__(self):
