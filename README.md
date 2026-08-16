@@ -1,4 +1,6 @@
-# GitHub Project Review
+# GitHub 项目审查
+
+`GitHub Project Review` · `github-project-review`
 
 面向有 Agent 协作的普通用户，只读审查公开 GitHub 项目，并用简短、易懂的方式回答：
 
