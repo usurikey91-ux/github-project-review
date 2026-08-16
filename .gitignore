@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.cache/
+github-evidence.json
+.DS_Store
+Thumbs.db
+/work/
+/outputs/
